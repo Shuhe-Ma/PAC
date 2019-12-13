@@ -7,21 +7,21 @@
 #' Also, the functions can help the users
 #' generate a clearer and easier way to
 #' get to know more information for some variables.
-#'
 #' @export
+#'
 
 my_api_key <- function(your_API = "FJPsznoKWRmpTORBUtMkarl17"){
   R.home(component = "home")
   usethis::edit_r_environ()
   writeLines( paste("NYC_API_KEY =", your_API), "~/.Renviron")
 }
-
+#' @export
 getRawData <- function(limit_num = "500000"){
   endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
   query1 <- list(
     "$$app_token" =  Sys.getenv("NYC_API_KEY"),  "$limit" = paste(limit_num)
   )
-
+#' @export
   get <- GET(endpoint, query = query1)
   if (http_error(get)) {
     warning("The request produced an error.")
@@ -31,7 +31,7 @@ getRawData <- function(limit_num = "500000"){
   }
 }
 
-
+#' @export
 getCleanData <- function(limit_num = "500000"){
   endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
   query1 <- list(
@@ -60,7 +60,7 @@ getCleanData <- function(limit_num = "500000"){
 
 }
 
-
+#' @export
 crime_type_add <- function(limit_num = 5000000, crime_type = "M", region="M") {
   endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
   query2 <- list("$$app_token" = Sys.getenv("NYC_API_KEY"), "$limit" = paste(limit_num), "law_cat_cd" = paste(crime_type), "arrest_boro"=paste(region))
@@ -75,7 +75,7 @@ crime_type_add <- function(limit_num = 5000000, crime_type = "M", region="M") {
   data1
 }
 
-
+#' @export
 crime_in_date <- function(limit_num = 5000000, month = 09, day= 01) {
   endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
   query <- list("$$app_token" = Sys.getenv("NYC_API_KEY"),  "$limit" = paste(limit_num), "arrest_date" = paste("2019-", paste(month), "-", paste(day),"T00:00:00.000", sep=""))
@@ -87,7 +87,7 @@ crime_in_date <- function(limit_num = 5000000, month = 09, day= 01) {
   }
   data
 }
-
+#' @export
 crime_type_gen <- function(gender = "all") {
   endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
   query <- list("$$app_token" = Sys.getenv("NYC_API_KEY"), "$limit" = "500000")
@@ -124,7 +124,7 @@ crime_type_gen <- function(gender = "all") {
     }
   }
 }
-
+#' @export
 crime_daily <- function(month=9) {
   endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
   if (month == 1|month ==3|month ==5|month ==7|month ==8|month ==10|month ==12){
@@ -157,14 +157,14 @@ crime_daily <- function(month=9) {
 
 }
 
-
+#' @export
 crime_trend <- function(month = 08){
   d <- crime_daily(month)
 
   ggplot(d, aes(x = Day, y = num)) + geom_line() +geom_point()+ggtitle(cat("Crimes trend in Month:", month))+scale_x_continuous("Day", labels = as.character(d$Day), breaks = d$Day)
 }
 
-
+#' @export
 crime_desc <- function(desc="ROBBERY"){
   endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
   query <- list(
