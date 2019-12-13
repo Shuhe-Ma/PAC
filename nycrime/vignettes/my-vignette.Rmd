@@ -1,0 +1,86 @@
+---
+title: "NYCRIME Vignette"
+author: "Shuhe Ma"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(knitr)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(purrr)
+library(plyr)
+library(stringr)
+library(httr)
+library(nycrime)
+```
+
+```{r setup}
+knitr::opts_chunk$set(include = FALSE)
+library(nycrime)
+```
+# NYCRIME Package
+This package is designed to get the data from 2019 NYC Arrest Data according different tasks. It can allow you to make requests for more
+information about this data set.
+
+## Function Description:
+
+```{}
+`my_api_key(your_API)`: Let the users enter their own API key and store it for the future uses.
+```
+- your_API: The API key you get from NYC open data
+
+```{}
+getRawData(limit_num):  Get the raw data set, please set your own APP token and the size of your data.
+```
+- limit_num: how many observations you want to get.
+
+```{}
+getCleanData(limit_num): The user has an option to get data in a simpler version. The data will contain fewer columns with readable names.
+```
+- limit_num: how many observations you want to get.
+
+```{}
+crime_type_add(limit_num, crime_type, region): Get the number of crimes based on their types and location
+```
+- limit_num: how many observations you want to get.
+- crime_type: the specific crime type. ("F" = "Felony",  "V", "Violence", "M", "Misdemeanor")
+- region: the specific region in NYC. ("M"= "Manhattan", "B"= "Bronx", "S"= "Staten Island","Q" = "Queens", "K"= "Brooklyn")
+
+```{}
+crime_in_date(limit_num, month, day): Get the crimes based on the date
+```
+- limit_num: how many observations you want to get.
+- month: month number from 01 - 09.
+- day; day number from 01 - 31.
+
+```{}
+crime_type_gen(gender): Get the summary table for the gender based on the crime types.
+```
+- gender: "M", "F" or "all".
+
+```{}
+crime_daily(month): Daily crime in one month.
+```
+- month: month number: 01 - 09.
+
+```{}
+crime_trend(month):  Trend in one month
+```
+- month: month number: 01 - 09.
+
+```{}
+crime_desc <- function(desc="ROBBERY"): Show Crimes based on descriptions by age group.
+```
+- desc: desciption of criminal behaviors: "ROBBERY", "ASSAULT" ...

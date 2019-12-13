@@ -1,0 +1,27 @@
+Package: nycrime
+Type: Package
+Title: Get Access to 2019 NYC Arrest Data
+Version: 0.1.0
+Authors@R: person("Shuhe", "Ma", email = "sm4768@columbia.edu",
+      role = c("aut", "cre"))
+Maintainer: Shuhe Ma <sm4768@columbia.edu>
+Description: This package is designed to get the 
+            data from 2019 NYC Arrest Data according different tasks. 
+            It can allow you to make requests for more
+            information about this data set.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    httr,
+    ggplot2,
+    tibble,
+    tidyr,
+    purrr,
+    stringr,
+    dplyr
+RoxygenNote: 6.1.99.9001
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
