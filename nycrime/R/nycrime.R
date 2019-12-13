@@ -8,7 +8,6 @@
 #' generate a clearer and easier way to
 #' get to know more information for some variables.
 #' @export
-#'
 
 my_api_key <- function(your_API = "FJPsznoKWRmpTORBUtMkarl17"){
   R.home(component = "home")
@@ -183,3 +182,5 @@ crime_desc <- function(desc="ROBBERY"){
   }
 
 }
+
+

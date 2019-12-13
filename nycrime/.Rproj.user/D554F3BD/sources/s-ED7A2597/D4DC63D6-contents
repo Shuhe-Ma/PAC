@@ -1,0 +1,74 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r warning=FALSE, include=}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# nycrime
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+This package is designed to get the data from 2019 NYC Arrest Data according different tasks. It can allow you to make requests for more
+information about this data set.
+
+## Installation
+
+You can install the released version of nycrime from [NYCRIME]()
+
+``` {}
+# install.package("devtools")
+# library("devtools")
+devtools::install_github("nycrime")
+```
+
+## The First Function
+
+Please register and get your API key from [NYC Open Data](https://data.cityofnewyork.us/signup)
+
+Then paste the unique APP Token and run the first function called `my_api_key` and restart R before you complete other tasks.
+
+```{}
+# my_api_key("YOUR KEY")
+# .rs.restartR()
+```
+
+
+## Example
+
+This is a basic example which shows you how to get the raw data:
+
+```{r}
+library(nycrime)
+```
+
+crime_type_add(200, "M", "M")
+
+```{r get raw data, echo=FALSE, warning=FALSE}
+crime_type_add <- function(limit_num = 5000000, crime_type = "M", region="M") {
+endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
+query2 <- list("$$app_token" = Sys.getenv("NYC_API_KEY"), "$limit" = paste(limit_num), "law_cat_cd" = paste(crime_type), "arrest_boro"=paste(region))
+get <- GET(endpoint, query = query2)
+if (http_error(get)) {
+	warning("The request produced an error.")
+} else {
+	data1 <- as.data.frame(content(get))
+}
+data1 < data1 %>% filter(law_cat_cd == paste(crime_type), arrest_boro == paste(region))
+
+data1
+
+}
+crime_type_add(200, "M", "M")
+```
+
+

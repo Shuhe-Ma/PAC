@@ -1,0 +1,186 @@
+#' NYC CRIME DATA
+#'
+#' The functions are designed to let users
+#' get access to the NYC arrest data from
+#' 01, 2019 to 09, 2019.
+#'
+#' Also, the functions can help the users
+#' generate a clearer and easier way to
+#' get to know more information for some variables.
+#' @export
+
+my_api_key <- function(your_API = "FJPsznoKWRmpTORBUtMkarl17"){
+  R.home(component = "home")
+  usethis::edit_r_environ()
+  writeLines( paste("NYC_API_KEY =", your_API), "~/.Renviron")
+}
+#' @export
+getRawData <- function(limit_num = "500000"){
+  endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
+  query1 <- list(
+    "$$app_token" =  Sys.getenv("NYC_API_KEY"),  "$limit" = paste(limit_num)
+  )
+#' @export
+  get <- GET(endpoint, query = query1)
+  if (http_error(get)) {
+    warning("The request produced an error.")
+  } else {
+    rawData <- as.data.frame(content(get))
+    assign("rawData", rawData, envir = globalenv())
+  }
+}
+
+#' @export
+getCleanData <- function(limit_num = "500000"){
+  endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
+  query1 <- list(
+    "$$app_token" = Sys.getenv("NYC_API_KEY"),  "$limit" = paste(limit_num)
+  )
+
+  get <- GET(endpoint, query = query1)
+  if (http_error(get)) {
+    warning("The request produced an error.")
+  } else {
+    rawData <- as.data.frame(content(get))
+  }
+  cleanData <- rawData %>% select(arrest_date, pd_desc, ofns_desc, type = law_cat_cd, location = arrest_boro,
+                                  age_group, sex = perp_sex, race=perp_race)
+  cleanData$type <- str_replace(cleanData$type, "F", "Felony")
+  cleanData$type <- str_replace(cleanData$type, "V", "Violence")
+  cleanData$type <- str_replace(cleanData$type, "M", "Misdemeanor")
+  cleanData$type <- str_replace(cleanData$type, "I", "Infractions")
+  cleanData$location <- str_replace_all(cleanData$location, "M", "Manhattan")
+  cleanData$locaiton <- str_replace_all(cleanData$location, "B", "Bronx")
+  cleanData$location <- str_replace_all(cleanData$location, "S", "Staten Island")
+  cleanData$location <- str_replace_all(cleanData$location, "Q", "Queens")
+  cleanData$location <- str_replace_all(cleanData$location, "K", "Brooklyn")
+
+  assign("cleanData", cleanData, envir = globalenv())
+
+}
+
+#' @export
+crime_type_add <- function(limit_num = 5000000, crime_type = "M", region="M") {
+  endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
+  query2 <- list("$$app_token" = Sys.getenv("NYC_API_KEY"), "$limit" = paste(limit_num), "law_cat_cd" = paste(crime_type), "arrest_boro"=paste(region))
+  get <- GET(endpoint, query = query2)
+  if (http_error(get)) {
+    warning("The request produced an error.")
+  } else {
+    data1 <- as.data.frame(content(get))
+  }
+  data1 < data1 %>% filter(law_cat_cd == paste(crime_type), arrest_boro == paste(region))
+
+  data1
+}
+
+#' @export
+crime_in_date <- function(limit_num = 5000000, month = 09, day= 01) {
+  endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
+  query <- list("$$app_token" = Sys.getenv("NYC_API_KEY"),  "$limit" = paste(limit_num), "arrest_date" = paste("2019-", paste(month), "-", paste(day),"T00:00:00.000", sep=""))
+  get <- GET(endpoint, query=query)
+  if (http_error(get)) {
+    warning("The request produced an error.")
+  } else {
+    data <- as.data.frame(content(get))
+  }
+  data
+}
+#' @export
+crime_type_gen <- function(gender = "all") {
+  endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
+  query <- list("$$app_token" = Sys.getenv("NYC_API_KEY"), "$limit" = "500000")
+  get <- GET(endpoint, query = query)
+  if (http_error(get)) {
+    warning("The request produced an error.")
+  }
+  else {
+    data <- as.data.frame(content(get))
+    data$law_cat_cd <- str_replace(data$law_cat_cd, "F", "Felony")
+    data$law_cat_cd <- str_replace(data$law_cat_cd, "V", "Violence")
+    data$law_cat_cd<- str_replace(data$law_cat_cd, "M", "Misdemeanor")
+    data$law_cat_cd <- str_replace(data$law_cat_cd, "I", "Infractions")
+
+    if (gender == "F"){
+      data <- data %>% filter(data$perp_sex == "F")
+      as.data.frame(table(data$law_cat_cd))
+    }
+
+    else if (gender == "M"){
+      data <- data %>% filter(data$perp_sex == "M")
+      as.data.frame(table(unlist(data$law_cat_cd)))
+
+    }
+
+    else {
+      data1 <- data %>% filter(data$perp_sex == "F")
+      d1 <- as.data.frame(table(data1$law_cat_cd))
+      data2 <- data %>% filter(data$perp_sex == "M")
+      d2 <- as.data.frame(table(data2$law_cat_cd))
+
+      d <- data.frame("crime_type"= d2$Var1, "Female" = d1$Freq,"Male"= d2$Freq)
+      d
+    }
+  }
+}
+#' @export
+crime_daily <- function(month=9) {
+  endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
+  if (month == 1|month ==3|month ==5|month ==7|month ==8|month ==10|month ==12){
+    num <- list()
+    day <- c(1:31)
+    for (i in 1:31){
+      num[i] <- list(nrow(as.data.frame(content(GET(endpoint, query=list("$$app_token" = Sys.getenv("NYC_API_KEY"),  "$limit" = "10000", "arrest_date" = paste("2019-", month, "-", i, "T00:00:00.000", sep="")))))))
+    }
+
+  }
+  else if (month == 4| month == 6|month ==9|month ==11){
+    num <- list()
+    day <- c(1:30)
+    for (i in 1:30){
+      num[i] <- list(nrow(as.data.frame(content(GET(endpoint, query=list("$$app_token" = Sys.getenv("NYC_API_KEY"),  "$limit" = "10000", "arrest_date" = paste("2019-", month, "-", i, "T00:00:00.000", sep="")))))))
+    }
+
+  }
+  else if (month == 2){
+    num <- list()
+    day <- list()
+    for (i in 1:28){
+      num[i] <- list(nrow(as.data.frame(content(GET(endpoint, query=list("$$app_token" = Sys.getenv("NYC_API_KEY"),  "$limit" = "10000", "arrest_date" = paste("2019-", month, "-", i, "T00:00:00.000", sep="")))))))
+      day[i] = i
+    }
+  }
+  a <- as.list(num)
+  day <- as.list(day)
+  data.frame("Month" = month, "Day" = 1:length(a), "num" = unlist(a))
+
+}
+
+#' @export
+crime_trend <- function(month = 08){
+  d <- crime_daily(month)
+
+  ggplot(d, aes(x = Day, y = num)) + geom_line() +geom_point()+ggtitle(cat("Crimes trend in Month:", month))+scale_x_continuous("Day", labels = as.character(d$Day), breaks = d$Day)
+}
+
+#' @export
+crime_desc <- function(desc="ROBBERY"){
+  endpoint <- "https://data.cityofnewyork.us/resource/uip8-fykc.csv"
+  query <- list(
+    "$$app_token" = Sys.getenv("NYC_API_KEY"),  "$limit" = "5000"
+  )
+  get <- GET(endpoint, query = query)
+  if (http_error(get)) {
+    warning("The request produced an error.")
+  } else {
+    data <- as.data.frame(content(get))
+    p <- paste(desc)
+    l <- data %>% mutate(desc = str_extract(data$pd_desc, pattern = p))
+    l <- select(l, age_group, desc)
+    l <- filter(l, is.na(desc)==F)
+    as.data.frame(table(l))
+  }
+
+}
+
+
